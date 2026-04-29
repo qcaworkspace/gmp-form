@@ -194,8 +194,9 @@ td.cell-hover:not(.cell-selected):not(.cell-editing){
 .badge-done{background:var(--green-bg);color:var(--green)}
 
 /* PHOTO */
-.photo-cell{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:8px;gap:5px;height:100%}
-.photo-thumb{width:auto;max-width:96px;height:116px;object-fit:cover;border-radius:5px;border:1px solid var(--border);cursor:zoom-in;display:block}
+.photo-cell{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:8px;gap:5px;height:100%;outline:none;border-radius:4px;transition:background .15s}
+.photo-cell:focus,.photo-cell:focus-within{background:var(--accent-bg);outline:2px dashed var(--accent-mid);}
+.photo-thumb{width:auto;max-width:100px;height:120px;object-fit:cover;border-radius:5px;border:1px solid var(--border);cursor:zoom-in;display:block}
 .photo-thumb:hover{opacity:.88}
 .photo-add{font-size:10px;padding:6px 10px;background:var(--bg);border:1.5px dashed var(--border);border-radius:5px;cursor:pointer;color:var(--text3);font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:3px;white-space:nowrap}
 .photo-add:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
@@ -375,12 +376,12 @@ td.cell-hover:not(.cell-selected):not(.cell-editing){
 // FIREBASE CONFIG — แก้ค่าเหล่านี้จาก Firebase Console
 // ═══════════════════════════════════════════════════════
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAGezc3VKjX8gxHQIvBfgIb64rVj4y4CcU",
-  authDomain: "gmp-form.firebaseapp.com",
-  projectId: "gmp-form",
-  storageBucket: "gmp-form.firebasestorage.app",
-  messagingSenderId: "210301155903",
-  appId: "1:210301155903:web:f8f1d3a7726680ba04d68a"
+  apiKey:            "PASTE_YOUR_apiKey_HERE",
+  authDomain:        "PASTE_YOUR_authDomain_HERE",
+  projectId:         "PASTE_YOUR_projectId_HERE",
+  storageBucket:     "PASTE_YOUR_storageBucket_HERE",
+  messagingSenderId: "PASTE_YOUR_messagingSenderId_HERE",
+  appId:             "PASTE_YOUR_appId_HERE",
 };
 
 import { initializeApp }                        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -529,11 +530,29 @@ function setStatus(state,msg){
 // ═══════════════════════════════════════════════════════
 // FIREBASE STORAGE — PHOTO
 // ═══════════════════════════════════════════════════════
+async function compressImage(file,maxPx=1200,quality=0.75){
+  return new Promise(resolve=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      let w=img.width,h=img.height;
+      if(w>maxPx||h>maxPx){const r=Math.min(maxPx/w,maxPx/h);w=Math.round(w*r);h=Math.round(h*r);}
+      const canvas=document.createElement("canvas");
+      canvas.width=w;canvas.height=h;
+      canvas.getContext("2d").drawImage(img,0,0,w,h);
+      canvas.toBlob(blob=>resolve(blob||file),"image/jpeg",quality);
+      URL.revokeObjectURL(url);
+    };
+    img.onerror=()=>resolve(file);
+    img.src=url;
+  });
+}
 async function uploadPhoto(rowId,side,file){
-  const r=stRef(st,`photos/${rowId}_${side}`);
-  showToast("📤 กำลังอัปโหลดรูป...",60000);
+  showToast("📤 กำลังบีบอัดและอัปโหลด...",60000);
   try{
-    await uploadBytes(r,file);
+    const compressed=await compressImage(file);
+    const r=stRef(st,`photos/${rowId}_${side}`);
+    await uploadBytes(r,compressed);
     const url=await getDownloadURL(r);
     document.getElementById("toast").style.display="none";
     return url;
@@ -546,7 +565,13 @@ async function deletePhotoStorage(rowId,side){
 // ═══════════════════════════════════════════════════════
 // STATUS (row)
 // ═══════════════════════════════════════════════════════
-function rowStatus(r){if(r.afterPhoto)return"done";if(r.fixer)return"fix";return"open";}
+function rowStatus(r){
+  const notFixed=["ยังไม่แก้ไข","ยังไม่ได้แก้","ยังไม่ได้แก้ไข"];
+  const cl=(r.closer||"").trim();
+  if(cl&&!notFixed.includes(cl))return"done";
+  if(r.fixer)return"fix";
+  return"open";
+}
 function statusLabel(s){return s==="done"?"ปิดประเด็น":s==="fix"?"กำลังแก้":"รอแก้ไข";}
 function statusCls(s){return`badge badge-${s}`;}
 
@@ -716,11 +741,16 @@ function renderInput(r,c,tab){
 
 function renderPhotoCell(r,side){
   const val=r[side];
-  return`<div class="photo-cell">
+  return`<div class="photo-cell" id="pc-${r.id}-${side}"
+    data-rid="${r.id}" data-side="${side}"
+    onpaste="window._pp(event,this.dataset.rid,this.dataset.side)"
+    tabindex="0"
+    title="คลิกแล้ว Ctrl+V วางรูปได้">
     ${val
       ?`<img class="photo-thumb" src="${esc(val)}" data-rid="${r.id}" data-side="${side}" onclick="window._ol(this.dataset.rid,this.dataset.side)"/>
         <button class="photo-del" data-rid="${r.id}" data-side="${side}" onclick="window._cp(this.dataset.rid,this.dataset.side)">ลบ</button>`
-      :`<button class="photo-add" data-rid="${r.id}" data-side="${side}" onclick="window._tp(this.dataset.rid,this.dataset.side)">📷 แทรก</button>`
+      :`<button class="photo-add" data-rid="${r.id}" data-side="${side}" onclick="window._tp(this.dataset.rid,this.dataset.side)">📷 แทรก</button>
+        <span style="font-size:9px;color:var(--text3);margin-top:1px">หรือ Ctrl+V</span>`
     }
     <input type="file" accept="image/*" id="ph-${r.id}-${side}" style="display:none"/>
   </div>`;
@@ -1049,6 +1079,34 @@ function reRenderTbody(){
 // ═══════════════════════════════════════════════════════
 // PHOTO
 // ═══════════════════════════════════════════════════════
+async function pastePhoto(rowId,side,e){
+  const items=[...(e.clipboardData||e.originalEvent?.clipboardData||{items:[]}).items];
+  const imgItem=items.find(i=>i.type.startsWith("image/"));
+  if(!imgItem)return;
+  e.preventDefault();
+  const file=imgItem.getAsFile();if(!file)return;
+  const tab=activeTab;
+  const url=await uploadPhoto(rowId,side,file);
+  if(!url)return;
+  const r=DB[tab]?.find(r=>r.id===rowId);if(!r)return;
+  upd(tab,rowId,side,url);
+  refreshStatusCell(rowId);
+  const td=document.getElementById(`td-${rowId}-${side}`);
+  if(td)td.innerHTML=renderPhotoCell(r,side);
+  attachPhotoHandlers();scheduleSave();
+}
+
+// Global paste: if no specific target, paste to last focused photo cell
+let _lastPhotoFocus=null;
+document.addEventListener("paste",function(e){
+  // Only handle if not in a text input/textarea
+  const tag=document.activeElement?.tagName;
+  if(tag==="INPUT"||tag==="TEXTAREA")return;
+  if(_lastPhotoFocus){
+    pastePhoto(_lastPhotoFocus.rid,_lastPhotoFocus.side,e);
+  }
+});
+
 function attachPhotoHandlers(){
   const tab=activeTab;
   DB[tab].forEach(r=>{
@@ -1065,6 +1123,12 @@ function attachPhotoHandlers(){
         if(td)td.innerHTML=renderPhotoCell(r,side);
         attachPhotoHandlers();scheduleSave();this.value="";
       });
+      // Track focus for global paste
+      const pc=document.getElementById(`pc-${r.id}-${side}`);
+      if(pc){
+        pc.addEventListener("focus",()=>_lastPhotoFocus={rid:r.id,side});
+        pc.addEventListener("click",()=>_lastPhotoFocus={rid:r.id,side});
+      }
     });
   });
 }
@@ -1119,7 +1183,7 @@ Object.assign(window,{
   _dpny:(ny,vm)=>dpBuild(+ny,+vm), _dpp:dpPick,
   _of:openFlt, _fs:(q)=>{if(_fltMeta)buildFlt(_fltMeta.col,q);},
   _ft:fltToggle, _fa:fltAll, _rf:removeFilter,
-  _tp:triggerPhoto, _cp:clearPhoto, _ol:openLb,
+  _tp:triggerPhoto, _cp:clearPhoto, _ol:openLb, _pp:pastePhoto,
   _upd:upd, _cs:colSort,
   togglePending, cycleSortDate, clearAllFilters, exportCSV, closeLb,
 });
