@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>แบบฟอร์มตรวจพื้นที่</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap');
+:root{
+  --bg:#f5f5f7;
+  --white:#fff;
+  --border:#dedede;
+  --border-light:#efefef;
+  --text:#1c1c1e;
+  --text2:#555;
+  --text3:#aaa;
+  --accent:#1a5cff;
+  --accent-bg:#eef2ff;
+  --accent-mid:#b3c6ff;
+  --sel-border:#1a5cff;
+  --sel-bg:#e8f0fe;
+  --edit-border:#1a5cff;
+  --green:#1a7a4a;
+  --green-bg:#e8f5ee;
+  --amber:#b06010;
+  --amber-bg:#fff4e6;
+  --blue:#1a5cff;
+  --blue-bg:#eef2ff;
+  --red:#c0392b;
+  --shadow:0 6px 24px rgba(0,0,0,.13);
+  --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--white);color:var(--text);font-size:13px;line-height:1.5;user-select:none}
+input,textarea,select{user-select:text}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:#d0d0d0;border-radius:3px}
+
+/* ─── HEADER ─── */
+#hdr{background:var(--white);border-bottom:1px solid var(--border);padding:0 22px;position:sticky;top:0;z-index:100}
+#hdr-top{display:flex;align-items:center;justify-content:space-between;padding:12px 0 10px}
+#brand{display:flex;align-items:center;gap:10px}
+#brand-ico{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0}
+#brand h1{font-size:14px;font-weight:700;letter-spacing:-.2px}
+#brand p{font-size:9px;color:var(--text3);letter-spacing:.7px;text-transform:uppercase}
+#hdr-btns{display:flex;gap:6px}
+.hbtn{font-size:11px;padding:6px 13px;border-radius:var(--r);cursor:pointer;font-family:inherit;font-weight:500;border:1px solid var(--border);background:var(--white);color:var(--text2);transition:all .15s;display:inline-flex;align-items:center;gap:4px}
+.hbtn:hover{border-color:#bbb;color:var(--text)}
+.hbtn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.hbtn-primary:hover{background:#1248d4}
+
+/* ─── HINT ─── */
+#hint-bar{background:var(--accent-bg);border-bottom:1px solid var(--accent-mid);padding:6px 22px;font-size:11px;color:var(--accent);font-weight:500;display:flex;align-items:center;gap:7px}
+#hint-bar.hide{display:none}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ─── TABS ─── */
+#tab-bar{display:flex;border-top:1px solid var(--border-light);overflow-x:auto}
+.tab-btn{padding:7px 15px;border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap;flex-shrink:0;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px}
+.tab-btn:hover{color:var(--text2)}
+.tab-btn.active{color:var(--accent);font-weight:600;border-bottom-color:var(--accent)}
+
+/* ─── TOOLBAR ─── */
+#toolbar{padding:8px 22px;display:none;align-items:center;gap:6px;flex-wrap:wrap;background:var(--bg);border-bottom:1px solid var(--border)}
+#toolbar.vis{display:flex}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--text2);font-family:inherit;font-weight:500;transition:all .15s}
+.pill:hover{border-color:#bbb;color:var(--text)}
+.pill.on{background:var(--accent-bg);border-color:var(--accent-mid);color:var(--accent)}
+.pill.warn{background:var(--amber-bg);border-color:#f0c890;color:var(--amber)}
+.tsep{width:1px;height:18px;background:var(--border)}
+#row-count{margin-left:auto;font-size:11px;color:var(--text3);font-weight:500}
+#fchips{display:flex;flex-wrap:wrap;gap:4px;width:100%;padding-top:5px}
+.chip{display:inline-flex;align-items:center;gap:3px;background:var(--blue-bg);border:1px solid var(--accent-mid);border-radius:14px;padding:2px 9px;font-size:10px;color:var(--blue);font-weight:500}
+.chip-x{cursor:pointer;font-size:13px;opacity:.6;line-height:1}
+.chip-x:hover{opacity:1}
+
+/* ─── CONTENT ─── */
+#content{padding:18px 22px 80px}
+
+/* ─── DEF ─── */
+.def-sec{margin-bottom:22px}
+.def-sec h3{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.def-grid{display:flex;flex-wrap:wrap;gap:8px}
+.def-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;min-width:140px}
+.def-card-title{font-weight:700;font-size:12px;color:var(--accent);margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--border-light)}
+.def-card.warm .def-card-title{color:var(--amber)}
+.def-item{font-size:11px;color:var(--text2);padding:2px 0;border-bottom:1px solid var(--border-light)}
+.def-item:last-child{border-bottom:none}
+
+/* ─── TABLE ─── */
+.tbl-outer{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--white)}
+.tbl-scroll{overflow-x:auto;overflow-y:visible}
+table{border-collapse:collapse;width:100%;min-width:1360px;background:var(--white);table-layout:fixed}
+
+/* THEAD */
+thead tr{background:#f8f8fa}
+th{
+  padding:9px 8px;border-right:1px solid var(--border-light);
+  border-bottom:2px solid var(--border);
+  color:var(--text2);font-weight:600;font-size:10px;letter-spacing:.5px;
+  text-transform:uppercase;vertical-align:top;text-align:center;
+  white-space:normal;position:relative;
+}
+th:last-child{border-right:none}
+.th-in{display:flex;flex-direction:column;align-items:center;gap:2px}
+.th-lbl{display:flex;align-items:center;gap:3px}
+.th-lbl.sortable{cursor:pointer}
+.th-lbl.sortable:hover .sico{opacity:.8}
+.sico{font-size:9px;opacity:.2;transition:opacity .15s}
+.sico.on{opacity:1;color:var(--accent)}
+.flt-btn{font-size:9px;opacity:.25;cursor:pointer;background:none;border:none;font-family:inherit;padding:0;color:var(--text);transition:opacity .15s;margin-top:1px}
+.flt-btn:hover,.flt-btn.on{opacity:1;color:var(--accent)}
+
+/* TBODY */
+tbody tr{border-bottom:1px solid var(--border-light)}
+tbody tr:last-child{border-bottom:none}
+tbody tr.pending{background:#fffbf5}
+tbody tr:hover{background:#fafafe}
+tbody tr.pending:hover{background:#fff6ec}
+
+/* TD — Excel style */
+td{
+  border-right:1px solid var(--border-light);
+  padding:0;vertical-align:top;
+  position:relative;
+  height:154px;
+  overflow:hidden;
+}
+td.slim{height:auto!important}
+td:last-child{border-right:none}
+
+/* cell states */
+td.cell-selected{
+  outline:2px solid var(--sel-border);
+  outline-offset:-2px;
+  background:var(--sel-bg)!important;
+  z-index:2;
+}
+td.cell-editing{
+  outline:2px solid var(--edit-border);
+  outline-offset:-2px;
+  background:var(--white)!important;
+  z-index:3;overflow:visible;
+}
+td.cell-hover:not(.cell-selected):not(.cell-editing){
+  background:#f5f8ff!important;
+  outline:1px solid var(--accent-mid);
+  outline-offset:-1px;
+}
+
+/* read-only content */
+.ro{padding:7px 9px;font-size:11px;color:var(--text);line-height:1.45;word-break:break-word;height:100%;cursor:default}
+.ro.empty{color:var(--text3)}
+.ro.clickable{cursor:pointer}
+
+/* edit input overlay */
+.edit-wrap{
+  position:absolute;inset:0;
+  background:var(--white);
+  z-index:10;
+  display:flex;align-items:flex-start;
+  padding:6px 8px;
+}
+.edit-inp{
+  width:100%;height:100%;
+  border:none;background:transparent;
+  font-size:11px;font-family:inherit;color:var(--text);
+  outline:none;resize:none;padding:0;
+  line-height:1.5;
+}
+.edit-inp::placeholder{color:var(--text3)}
+
+/* COMBO overlay */
+.combo-inp{
+  width:100%;height:100%;border:none;background:transparent;
+  font-size:11px;font-family:inherit;color:var(--text);outline:none;padding:0;
+  cursor:pointer;
+}
+.combo-inp:focus{cursor:text}
+.combo-inp::placeholder{color:var(--text3)}
+
+/* DATE overlay */
+.dp-row-in{display:flex;align-items:center;gap:3px;width:100%}
+.dp-txt{flex:1;border:none;background:transparent;font-size:11px;font-family:inherit;color:var(--text);outline:none;padding:0;min-width:0}
+.dp-txt::placeholder{color:var(--text3)}
+.dp-arr{cursor:pointer;color:var(--text3);font-size:10px;background:none;border:none;padding:0 1px;line-height:1;flex-shrink:0}
+.dp-arr:hover{color:var(--accent)}
+
+/* STATUS */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:12px;font-size:10px;font-weight:600;white-space:nowrap}
+.badge-open{background:var(--amber-bg);color:var(--amber)}
+.badge-fix{background:var(--blue-bg);color:var(--blue)}
+.badge-done{background:var(--green-bg);color:var(--green)}
+
+/* PHOTO */
+.photo-cell{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:8px;gap:5px;height:100%}
+.photo-thumb{width:auto;max-width:96px;height:116px;object-fit:cover;border-radius:5px;border:1px solid var(--border);cursor:zoom-in;display:block}
+.photo-thumb:hover{opacity:.88}
+.photo-add{font-size:10px;padding:6px 10px;background:var(--bg);border:1.5px dashed var(--border);border-radius:5px;cursor:pointer;color:var(--text3);font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:3px;white-space:nowrap}
+.photo-add:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.photo-del{font-size:10px;background:none;border:none;cursor:pointer;color:var(--text3);font-family:inherit}
+.photo-del:hover{color:var(--red)}
+
+/* ADD ROW */
+.add-wrap{padding:9px 0;display:flex;align-items:center;gap:14px}
+.add-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border:1.5px dashed var(--border);border-radius:var(--r);cursor:pointer;font-size:11px;color:var(--text3);font-family:inherit;font-weight:500;background:transparent;transition:all .15s}
+.add-btn:hover{background:var(--accent-bg);border-color:var(--accent-mid);color:var(--accent)}
+
+/* DEL BTN */
+.del-btn{background:none;border:none;cursor:pointer;color:#ddd;font-size:13px;padding:4px;line-height:1;display:block;transition:color .15s}
+.del-btn:hover{color:var(--red)}
+
+/* ── GLOBAL POPUPS ── */
+#g-combo,#g-dp,#g-flt{
+  position:fixed;z-index:9500;display:none;
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--r);box-shadow:var(--shadow);
+}
+#g-combo.open,#g-dp.open,#g-flt.open{display:block}
+
+#g-combo{
+  min-width:180px;max-height:240px;overflow-y:auto;
+  padding:6px 0;
+  border-radius:10px;
+  box-shadow:0 8px 32px rgba(26,92,255,.13),0 2px 8px rgba(0,0,0,.08);
+  border:1.5px solid var(--accent-mid);
+}
+.combo-opt{
+  padding:9px 14px;cursor:pointer;font-size:12px;color:var(--text);
+  transition:background .1s;
+  border-radius:6px;margin:1px 5px;
+}
+.combo-opt:hover{background:var(--accent-bg);color:var(--accent);font-weight:500;}
+.combo-opt.combo-highlighted{background:var(--accent);color:#fff;font-weight:600;}
+
+#g-dp{padding:14px;width:232px}
+.dp-nav{display:flex;align-items:center;gap:4px;margin-bottom:10px}
+.dp-nav-btn{background:none;border:none;cursor:pointer;font-size:16px;padding:0 3px;color:var(--text2);line-height:1}
+.dp-nav-btn:hover{color:var(--accent)}
+.dp-sel{font-size:11px;border:1px solid var(--border);border-radius:4px;padding:2px 5px;background:var(--bg);font-family:inherit;color:var(--text)}
+.dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.dp-hdr{font-size:9px;color:var(--text3);padding:2px 0;font-weight:500}
+.dp-day{padding:4px 0;border-radius:4px;cursor:pointer;font-size:11px;color:var(--text)}
+.dp-day:hover{background:var(--accent-bg);color:var(--accent)}
+.dp-day.today{color:var(--accent);font-weight:700}
+.dp-day.sel{background:var(--accent);color:#fff;font-weight:700}
+.dp-today{margin-top:8px;width:100%;font-size:10px;padding:5px;background:var(--bg);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-family:inherit;color:var(--text2)}
+.dp-today:hover{background:var(--accent-bg);color:var(--accent)}
+
+#g-flt{min-width:190px;max-width:240px;padding:8px 0 5px}
+.flt-search{margin:0 9px 6px;padding:5px 9px;border:1px solid var(--border);border-radius:4px;font-size:11px;width:calc(100% - 18px);font-family:inherit;outline:none;background:var(--bg)}
+.flt-search:focus{border-color:var(--accent-mid)}
+.flt-list{max-height:175px;overflow-y:auto}
+.flt-row{display:flex;align-items:center;gap:7px;padding:5px 12px;cursor:pointer;font-size:11px;color:var(--text)}
+.flt-row:hover{background:var(--bg)}
+.flt-row input{accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.flt-foot{display:flex;gap:5px;padding:6px 9px 2px;border-top:1px solid var(--border-light);margin-top:3px}
+.flt-act{flex:1;font-size:10px;padding:4px;border-radius:4px;cursor:pointer;font-family:inherit;border:1px solid var(--border);background:var(--bg);color:var(--text2);transition:all .15s}
+.flt-act:hover{background:var(--accent-bg);color:var(--accent)}
+
+/* LIGHTBOX */
+#lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:99999;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+#lb.open{display:flex}
+#lb-img{max-width:90vw;max-height:88vh;border-radius:var(--r);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+#lb-x{position:fixed;top:14px;right:16px;background:rgba(255,255,255,.95);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center}
+
+/* TOAST */
+#toast{position:fixed;bottom:18px;right:20px;background:#1c1c1e;color:#fff;padding:10px 18px;border-radius:var(--r);font-size:12px;display:none;z-index:99999;box-shadow:var(--shadow);animation:sup .2s ease}
+@keyframes sup{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── EXCEL-STYLE CELLS ─── */
+/* All editable cells */
+.xcell{
+  border-right:1px solid var(--border-light);
+  padding:0;vertical-align:top;
+  position:relative;
+  height:154px;overflow:hidden;
+  cursor:default;
+}
+.xcell.xhover:not(.xsel):not(.xedit){
+  background:#f0f5ff;
+  outline:1px solid var(--accent-mid);
+  outline-offset:-1px;
+}
+.xcell.xsel{
+  outline:2px solid var(--accent);
+  outline-offset:-2px;
+  background:var(--sel-bg);
+  z-index:2;
+}
+.xcell.xedit{
+  outline:2px solid var(--accent);
+  outline-offset:-2px;
+  background:var(--white)!important;
+  z-index:3;overflow:visible;
+}
+/* Read-only content inside xcell */
+.xcontent{
+  padding:7px 9px;font-size:11px;color:var(--text);
+  line-height:1.45;word-break:break-word;height:100%;
+  display:flex;align-items:flex-start;justify-content:center;
+  text-align:center;
+}
+.xcontent.left{justify-content:flex-start;text-align:left;}
+.xcontent.empty{color:var(--text3);}
+
+/* Input overlay */
+.xinput-wrap{
+  position:absolute;inset:0;
+  background:var(--white);
+  z-index:10;
+  display:flex;flex-direction:column;justify-content:flex-start;
+  padding:6px 8px;gap:0;
+}
+.xinput{
+  flex:1;width:100%;
+  border:none;background:transparent;
+  font-size:11px;font-family:inherit;color:var(--text);
+  outline:none;padding:0;
+  text-align:center;
+}
+.xinput.left-inp{text-align:left;}
+.xinput::placeholder{color:var(--text3);}
+.xtarea{resize:none;line-height:1.5;text-align:left!important;}
+/* combo: show dropdown indicator inside input */
+.combo-inp{cursor:pointer;padding-right:16px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23aaa'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 2px center;background-size:8px 5px;}
+.combo-inp:focus{cursor:text;}
+/* date cell cursor */
+.xinput-wrap.date-wrap{cursor:default;}
+.dp-arr{cursor:pointer;color:var(--text3);font-size:11px;background:none;border:none;padding:0 2px;line-height:1;flex-shrink:0;}
+.dp-arr:hover{color:var(--accent);}
+/* date read-only cell */
+.xcell.date-cell{cursor:pointer;}
+</style>
+</head>
+<body>
+
+<div id="g-combo"></div>
+<div id="g-dp"></div>
+<div id="g-flt"></div>
+<div id="lb"><img id="lb-img" src="" alt=""/><button id="lb-x" onclick="closeLb()">✕</button></div>
+<div id="toast"></div>
+
+<!-- HEADER -->
+<div id="hdr">
+  <div id="hdr-top">
+    <div id="brand">
+      <div id="brand-ico">📋</div>
+      <div><h1>แบบฟอร์มตรวจพื้นที่</h1><p>Facility Inspection Record</p></div>
+    </div>
+    <div id="hdr-btns">
+      <button class="hbtn" onclick="exportCSV()">⬇ CSV</button>
+      <span id="sync-status" style="font-size:11px;font-weight:500;color:#888">⏳ กำลังโหลด...</span>
+    </div>
+  </div>
+  <div id="tab-bar"></div>
+</div>
+<div id="hint-bar" class="hide">
+  <span class="pulse"></span>
+  คลิก 1 ครั้งเพื่อเลือก cell — คลิก 2 ครั้ง หรือพิมพ์ทันที เพื่อแก้ไข — คลิกที่อื่น / Enter / Tab เพื่อจบ
+</div>
+<div id="toolbar">
+  <button class="pill" id="p-pend" onclick="togglePending()">⚠ งานค้าง</button>
+  <button class="pill" id="p-date" onclick="cycleSortDate()">วันที่แจ้ง ↕</button>
+  <div class="tsep"></div>
+  <button class="pill" id="p-clr" onclick="clearAllFilters()" style="display:none">✕ ล้างตัวกรอง</button>
+  <span id="row-count"></span>
+  <div id="fchips"></div>
+</div>
+<div id="content"></div>
+
+<script type="module">
+// ═══════════════════════════════════════════════════════
+// FIREBASE CONFIG — แก้ค่าเหล่านี้จาก Firebase Console
+// ═══════════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAGezc3VKjX8gxHQIvBfgIb64rVj4y4CcU",
+  authDomain: "gmp-form.firebaseapp.com",
+  projectId: "gmp-form",
+  storageBucket: "gmp-form.firebasestorage.app",
+  messagingSenderId: "210301155903",
+  appId: "1:210301155903:web:f8f1d3a7726680ba04d68a"
+};
+
+import { initializeApp }                        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc,
+         onSnapshot, serverTimestamp }          from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref as stRef,
+         uploadBytes, getDownloadURL,
+         deleteObject }                         from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+const app = initializeApp(FIREBASE_CONFIG);
+const db  = getFirestore(app);
+const st  = getStorage(app);
+
+// ═══════════════════════════════════════════════════════
+// DATA DEFINITIONS
+// ═══════════════════════════════════════════════════════
+const DEFS={
+  "อาคาร 1":       ["ห้องเตรียม","ห้องชั่งเตรียมวัตถุดิบ","ห้องต้ม","ห้อง Cooling","ห้องส่งขวด","ห้องบรรจุใน","ห้องบรรจุนอก","ห้องแพ็ค"],
+  "อาคาร 2":       ["ห้องเตรียม","ห้องต้ม/ผัด/โม่","ห้องส่งขวด","ห้องบรรจุใน","ห้องบรรจุนอก","ห้อง Retort","ห้อง Cooling","ห้องแพ็ค"],
+  "อาคาร 3":       ["ห้องมาโย","ห้องอุด้ง","ห้องแพ็ค"],
+  "พื้นที่ภายนอก": ["ห้องช่าง","ห้องน้ำ","ห้องขยะ","Boiler","น้ำดี/เสีย","ถนน","โรงอาหาร"],
+  "โรงงาน 2":      ["คลัง RM","คลัง PK","คลัง FG"],
+};
+const PROB_TYPES=["ความสะอาด","การบำรุงรักษา","สัตว์พาหะ","สุขลักษณะ"];
+const PROB_SUB={
+  "ความสะอาด":    ["คราบดำ","สกปรก","หยากไย่"],
+  "การบำรุงรักษา":["สนิม","ชำรุด","เสื่อมสภาพ","ปนเปื้อน"],
+  "สัตว์พาหะ":   ["ตัว","ซาก","ร่องรอย","มูล"],
+  "สุขลักษณะ":   ["การแต่งกาย","ความประพฤติ"],
+};
+const AREA_TABS=["อาคาร 1","อาคาร 2","อาคาร 3","พื้นที่ภายนอก","โรงงาน 2"];
+const ALL_TABS=["นิยาม",...AREA_TABS];
+const COLS=[
+  {key:"no",           label:"No",              w:42,  sort:false,flt:false,type:"no"},
+  {key:"area",         label:"พื้นที่",         w:118, sort:true, flt:true, type:"combo"},
+  {key:"beforePhoto",  label:"ภาพก่อนแก้ไข",  w:110, sort:false,flt:false,type:"photo"},
+  {key:"problemType",  label:"ประเภทปัญหา",    w:118, sort:true, flt:true, type:"combo"},
+  {key:"problemDetail",label:"รายละเอียดปัญหา",w:140, sort:false,flt:false,type:"text"},
+  {key:"status",       label:"สถานะ",           w:88,  sort:true, flt:true, type:"status"},
+  {key:"reporter",     label:"ผู้แจ้ง",         w:88,  sort:true, flt:true, type:"text"},
+  {key:"reportDate",   label:"วันที่แจ้ง",     w:98,  sort:true, flt:false,type:"date"},
+  {key:"dueDate",      label:"วันกำหนดเสร็จ", w:106, sort:true, flt:false,type:"date"},
+  {key:"fixer",        label:"ผู้แก้ไข",       w:88,  sort:true, flt:true, type:"text"},
+  {key:"afterPhoto",   label:"ภาพหลังแก้ไข",  w:110, sort:false,flt:false,type:"photo"},
+  {key:"closer",       label:"ผู้ปิดประเด็น",  w:106, sort:true, flt:true, type:"text"},
+];
+const EDITABLE_COLS=COLS.filter(c=>c.type!=="no"&&c.type!=="photo"&&c.type!=="status");
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+const pad=n=>String(n).padStart(2,"0");
+function todayDMY(){const d=new Date();return`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;}
+function parseDMY(s){if(!s)return null;const[a,b,c]=s.split("/");return new Date(+c,+b-1,+a);}
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function newRow(no){return{id:uid(),no,area:"",problemType:"",problemDetail:"",reporter:"",reportDate:todayDMY(),dueDate:"",fixer:"",closer:"",beforePhoto:"",afterPhoto:""};}
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let DB={};
+AREA_TABS.forEach(t=>{DB[t]=[newRow(1)];});
+
+let activeTab="นิยาม";
+let selCell=null, isEditing=false;
+let pendingFirst=false,sortDateDir=0,sortColKey=null,sortColDir=1;
+let filters={};
+let _dpMeta=null,_comboMeta=null,_fltMeta=null;
+let activeDpId=null,activeFltCol=null;
+let _unsubscribe=null;
+let _saveTimer=null;
+let _localChange=false;
+
+// ═══════════════════════════════════════════════════════
+// FIREBASE — LOAD & REALTIME SYNC
+// ═══════════════════════════════════════════════════════
+const DOC_REF=doc(db,"inspection","main");
+
+async function fbLoad(){
+  setStatus("loading");
+  try{
+    const snap=await getDoc(DOC_REF);
+    if(snap.exists()){
+      const data=snap.data();
+      AREA_TABS.forEach(t=>{if(data[t]&&data[t].length)DB[t]=data[t];});
+    }
+    setStatus("ok");
+  }catch(e){setStatus("error","โหลดไม่ได้: "+e.message);}
+  render();
+  startListener();
+}
+
+function startListener(){
+  if(_unsubscribe)_unsubscribe();
+  _unsubscribe=onSnapshot(DOC_REF,snap=>{
+    if(_localChange)return;
+    if(!snap.exists())return;
+    const data=snap.data();
+    let changed=false;
+    AREA_TABS.forEach(t=>{
+      if(data[t]&&JSON.stringify(data[t])!==JSON.stringify(DB[t])){
+        DB[t]=data[t];changed=true;
+      }
+    });
+    if(changed){
+      showToast("🔄 ข้อมูลอัปเดตจากผู้ใช้คนอื่น");
+      if(activeTab!=="นิยาม")reRenderTbody();
+      renderToolbar();
+    }
+  },err=>{setStatus("error","Sync หยุด: "+err.message);});
+}
+
+async function fbSave(){
+  _localChange=true;
+  setStatus("saving");
+  try{
+    const payload={updatedAt:serverTimestamp()};
+    AREA_TABS.forEach(t=>{payload[t]=DB[t];});
+    await setDoc(DOC_REF,payload,{merge:false});
+    setStatus("ok");
+  }catch(e){
+    setStatus("error","บันทึกไม่ได้");
+    showToast("❌ บันทึกไม่สำเร็จ: "+e.message,5000);
+  }
+  setTimeout(()=>{_localChange=false;},1200);
+}
+
+function scheduleSave(){
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(fbSave,1200);
+}
+
+function setStatus(state,msg){
+  const el=document.getElementById("sync-status");if(!el)return;
+  const map={
+    loading:["⏳","กำลังโหลด...","#888"],
+    saving: ["💾","กำลังบันทึก...","#b06010"],
+    ok:     ["🟢","Sync realtime","#1a7a4a"],
+    error:  ["🔴",msg||"เกิดข้อผิดพลาด","#c0392b"],
+  };
+  const[ico,txt,col]=map[state]||map.ok;
+  el.textContent=ico+" "+txt;el.style.color=col;
+}
+
+// ═══════════════════════════════════════════════════════
+// FIREBASE STORAGE — PHOTO
+// ═══════════════════════════════════════════════════════
+async function uploadPhoto(rowId,side,file){
+  const r=stRef(st,`photos/${rowId}_${side}`);
+  showToast("📤 กำลังอัปโหลดรูป...",60000);
+  try{
+    await uploadBytes(r,file);
+    const url=await getDownloadURL(r);
+    document.getElementById("toast").style.display="none";
+    return url;
+  }catch(e){showToast("❌ อัปโหลดไม่สำเร็จ: "+e.message,5000);return null;}
+}
+async function deletePhotoStorage(rowId,side){
+  try{await deleteObject(stRef(st,`photos/${rowId}_${side}`));}catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════
+// STATUS (row)
+// ═══════════════════════════════════════════════════════
+function rowStatus(r){if(r.afterPhoto)return"done";if(r.fixer)return"fix";return"open";}
+function statusLabel(s){return s==="done"?"ปิดประเด็น":s==="fix"?"กำลังแก้":"รอแก้ไข";}
+function statusCls(s){return`badge badge-${s}`;}
+
+// ═══════════════════════════════════════════════════════
+// PIPELINE
+// ═══════════════════════════════════════════════════════
+function getColVal(r,key){if(key==="status")return statusLabel(rowStatus(r));return r[key]||"";}
+function getRows(tab){
+  let rows=DB[tab].slice();
+  for(const[col,vals]of Object.entries(filters)){
+    if(!vals||!vals.size)continue;
+    rows=rows.filter(r=>vals.has(getColVal(r,col)));
+  }
+  if(pendingFirst){const ord={open:0,fix:1,done:2};rows.sort((a,b)=>ord[rowStatus(a)]-ord[rowStatus(b)]);}
+  else if(sortDateDir){rows.sort((a,b)=>sortDateDir*((parseDMY(a.reportDate)||0)-(parseDMY(b.reportDate)||0)));}
+  else if(sortColKey){rows.sort((a,b)=>sortColDir*String(getColVal(a,sortColKey)).localeCompare(String(getColVal(b,sortColKey)),"th"));}
+  return rows;
+}
+function uniqueVals(tab,col){
+  const s=new Set();DB[tab].forEach(r=>{const v=getColVal(r,col);if(v)s.add(v);});
+  return[...s].sort((a,b)=>a.localeCompare(b,"th"));
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function render(){renderTabs();renderToolbar();renderContent();}
+
+function renderTabs(){
+  document.getElementById("tab-bar").innerHTML=
+    ALL_TABS.map((t,i)=>`<button class="tab-btn${t===activeTab?" active":""}" onclick="window._st(${i})">${t}</button>`).join("");
+}
+function switchTab(i){
+  commitEdit();
+  activeTab=ALL_TABS[i];selCell=null;isEditing=false;
+  filters={};sortColKey=null;sortDateDir=0;pendingFirst=false;
+  closeAllPopups();render();
+  document.getElementById("hint-bar").classList.toggle("hide",activeTab==="นิยาม");
+}
+
+function renderToolbar(){
+  const tb=document.getElementById("toolbar");
+  if(activeTab==="นิยาม"){tb.classList.remove("vis");return;}
+  tb.classList.add("vis");
+  document.getElementById("p-pend").className="pill"+(pendingFirst?" warn":"");
+  const dl=["วันที่แจ้ง ↕","วันที่แจ้ง ↑","วันที่แจ้ง ↓"];
+  const sp=document.getElementById("p-date");
+  sp.textContent=dl[sortDateDir===0?0:sortDateDir===1?1:2];
+  sp.className="pill"+(sortDateDir?" on":"");
+  const hasF=Object.values(filters).some(v=>v&&v.size);
+  document.getElementById("p-clr").style.display=hasF?"":"none";
+  const chips=[];
+  for(const[col,vals]of Object.entries(filters)){
+    if(!vals||!vals.size)continue;
+    const lbl=COLS.find(c=>c.key===col)?.label||col;
+    for(const v of vals)chips.push(`<span class="chip">${lbl}: ${esc(v)}<span class="chip-x" onclick="window._rf('${col}','${esc(v)}')">×</span></span>`);
+  }
+  document.getElementById("fchips").innerHTML=chips.join("");
+  const disp=getRows(activeTab).length,tot=DB[activeTab].length;
+  document.getElementById("row-count").textContent=disp<tot?`แสดง ${disp}/${tot} แถว`:`${tot} แถว`;
+}
+
+function renderContent(){
+  document.getElementById("content").innerHTML=activeTab==="นิยาม"?renderDef():renderArea(activeTab);
+  if(activeTab!=="นิยาม")attachPhotoHandlers();
+}
+
+function renderDef(){
+  const ac=Object.entries(DEFS).map(([b,list])=>`<div class="def-card"><div class="def-card-title">${b}</div>${list.map(a=>`<div class="def-item">${a}</div>`).join("")}</div>`).join("");
+  const pc=Object.entries(PROB_SUB).map(([t,subs])=>`<div class="def-card warm"><div class="def-card-title">${t}</div>${subs.map(s=>`<div class="def-item">${s}</div>`).join("")}</div>`).join("");
+  return`<div class="def-sec"><h3>พื้นที่แต่ละอาคาร</h3><div class="def-grid">${ac}</div></div>
+         <div class="def-sec"><h3>ประเภทปัญหา &amp; รายละเอียดอ้างอิง</h3><div class="def-grid">${pc}</div></div>`;
+}
+
+function renderArea(tab){
+  const rows=getRows(tab);
+  const ths=COLS.map(c=>{
+    const sico=c.sort?`<span class="sico${sortColKey===c.key?" on":""}">${sortColKey===c.key?(sortColDir===1?"↑":"↓"):"↕"}</span>`:"";
+    const fib=c.flt?`<button class="flt-btn${(filters[c.key]&&filters[c.key].size)?" on":""}" data-col="${c.key}" onclick="window._of(event,this.dataset.col)">▾</button>`:"";
+    const sc=c.sort?`onclick="window._cs('${c.key}')"` :"";
+    return`<th style="width:${c.w}px"><div class="th-in"><div class="th-lbl${c.sort?" sortable":""}" ${sc}>${c.label} ${sico}</div>${fib}</div></th>`;
+  }).join("")+"<th style='width:30px'></th>";
+  const tbody=rows.length===0
+    ?`<tr><td colspan="${COLS.length+1}" class="slim"><div style="text-align:center;padding:32px;color:var(--text3);font-size:12px">— ไม่มีข้อมูล —</div></td></tr>`
+    :rows.map(r=>renderRow(r,tab)).join("");
+  return`<div class="tbl-outer"><div class="tbl-scroll">
+    <table><thead><tr>${ths}</tr></thead>
+    <tbody id="main-tbody">${tbody}</tbody></table>
+  </div></div>
+  <div class="add-wrap"><button class="add-btn" onclick="window._ar()">＋ เพิ่มแถว</button></div>`;
+}
+
+function renderRow(r,tab){
+  const st=rowStatus(r);
+  const cells=COLS.map(c=>renderCell(r,c,tab)).join("");
+  return`<tr class="${st==="open"?"pending":""}" id="row-${r.id}">${cells}
+    <td class="slim" style="vertical-align:top;padding-top:8px;text-align:center">
+      <button class="del-btn" data-rid="${r.id}" onclick="window._dr(event,this.dataset.rid)">✕</button>
+    </td></tr>`;
+}
+
+function renderCell(r,c,tab){
+  const isSel=selCell&&selCell.rowId===r.id&&selCell.colKey===c.key;
+  const isEdit=isSel&&isEditing;
+  if(c.type==="no"){
+    return`<td style="width:${c.w}px;vertical-align:top;text-align:center;padding:8px 4px">
+      <span style="font-size:10px;color:var(--text3);font-weight:500">${r.no}</span></td>`;
+  }
+  if(c.type==="photo"){
+    return`<td style="width:${c.w}px;vertical-align:top" id="td-${r.id}-${c.key}">${renderPhotoCell(r,c.key)}</td>`;
+  }
+  if(c.type==="status"){
+    const st=rowStatus(r);
+    return`<td style="width:${c.w}px;vertical-align:top;padding:8px 6px;text-align:center" id="td-${r.id}-status">
+      <span class="${statusCls(st)}">${statusLabel(st)}</span></td>`;
+  }
+  const cellCls=["xcell",isSel?"xsel":"",isEdit?"xedit":""].filter(Boolean).join(" ");
+  const val=r[c.key]||"";
+  if(isEdit){
+    return`<td style="width:${c.w}px" id="td-${r.id}-${c.key}" class="${cellCls}">${renderInput(r,c,tab)}</td>`;
+  }
+  const isLeft=c.key==="problemDetail";
+  const display=c.key==="problemType"&&val?`<span style="font-weight:600;color:var(--accent)">${esc(val)}</span>`:(val?esc(val):"");
+  return`<td style="width:${c.w}px${c.type==="date"?";cursor:pointer":""}" id="td-${r.id}-${c.key}" class="${cellCls}"
+    data-rid="${r.id}" data-col="${c.key}"
+    onclick="window._cc(event,this)"
+    onmouseenter="this.classList.add('xhover')"
+    onmouseleave="this.classList.remove('xhover')">
+    <div class="xcontent${val?"":" empty"}${isLeft?" left":""}">${display||"—"}</div>
+  </td>`;
+}
+
+function renderInput(r,c,tab){
+  const val=r[c.key]||"";
+  if(c.type==="combo"){
+    const opts=c.key==="area"?["",...(DEFS[tab]||[])]:c.key==="problemType"?["",...PROB_TYPES]:[];
+    return`<div class="xinput-wrap" style="position:relative">
+      <div style="position:absolute;top:4px;right:6px;font-size:9px;color:var(--text3);pointer-events:none;font-weight:500">เลือก ▾</div>
+      <input class="xinput combo-inp" id="ei-${r.id}-${c.key}" value="${esc(val)}"
+        placeholder="พิมพ์หรือเลือก..."
+        data-rid="${r.id}" data-col="${c.key}"
+        data-opts="${esc(JSON.stringify(opts))}"
+        oninput="window._ct(this)" onfocus="window._cf(this)"
+        onblur="window._xb(this)" onkeydown="window._kc(event,this)"
+        autocomplete="off" style="padding-right:42px"/>
+    </div>`;
+  }
+  if(c.type==="date"){
+    return`<div class="xinput-wrap" style="flex-direction:row;align-items:center;gap:2px">
+      <input class="xinput" id="ei-${r.id}-${c.key}" value="${esc(val)}" placeholder="DD/MM/YYYY"
+        data-rid="${r.id}" data-col="${c.key}"
+        oninput="window._upd(activeTab,this.dataset.rid,this.dataset.col,this.value)"
+        onblur="window._xb(this)" onkeydown="window._xk(event,this)"
+        style="flex:1;min-width:0;cursor:pointer;text-align:center"/>
+      <button class="dp-arr" type="button" data-rid="${r.id}" data-col="${c.key}"
+        onmousedown="window._dpt(event,this)" style="cursor:pointer">📅</button>
+    </div>`;
+  }
+  return`<div class="xinput-wrap">
+    <textarea class="xinput xtarea left-inp" id="ei-${r.id}-${c.key}"
+      data-rid="${r.id}" data-col="${c.key}" placeholder="${c.label}..."
+      oninput="window._upd(activeTab,this.dataset.rid,this.dataset.col,this.value)"
+      onblur="window._xb(this)" onkeydown="window._xk(event,this)"
+    >${esc(val)}</textarea>
+  </div>`;
+}
+
+function renderPhotoCell(r,side){
+  const val=r[side];
+  return`<div class="photo-cell">
+    ${val
+      ?`<img class="photo-thumb" src="${esc(val)}" data-rid="${r.id}" data-side="${side}" onclick="window._ol(this.dataset.rid,this.dataset.side)"/>
+        <button class="photo-del" data-rid="${r.id}" data-side="${side}" onclick="window._cp(this.dataset.rid,this.dataset.side)">ลบ</button>`
+      :`<button class="photo-add" data-rid="${r.id}" data-side="${side}" onclick="window._tp(this.dataset.rid,this.dataset.side)">📷 แทรก</button>`
+    }
+    <input type="file" accept="image/*" id="ph-${r.id}-${side}" style="display:none"/>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// CELL INTERACTION — Excel style
+// ═══════════════════════════════════════════════════════
+function xCellClick(e,td){
+  e.stopPropagation();
+  const rowId=td.dataset.rid,colKey=td.dataset.col;
+  if(selCell&&selCell.rowId===rowId&&selCell.colKey===colKey){if(!isEditing)enterEdit();return;}
+  commitEdit();selectCell(rowId,colKey);
+}
+function selectCell(rowId,colKey){
+  if(selCell){const old=document.getElementById(`td-${selCell.rowId}-${selCell.colKey}`);if(old)old.classList.remove("xsel","xedit");}
+  selCell={rowId,colKey};isEditing=false;
+  const td=document.getElementById(`td-${rowId}-${colKey}`);
+  if(td){td.classList.add("xsel");td.classList.remove("xedit","xhover");}
+}
+function enterEdit(){
+  if(!selCell)return;
+  const{rowId,colKey}=selCell;isEditing=true;
+  const td=document.getElementById(`td-${rowId}-${colKey}`);if(!td)return;
+  const r=DB[activeTab]?.find(r=>r.id===rowId);if(!r)return;
+  const c=COLS.find(c=>c.key===colKey);
+  td.classList.add("xedit");td.removeAttribute("onclick");
+  td.innerHTML=renderInput(r,c,activeTab);
+  const inp=document.getElementById(`ei-${rowId}-${colKey}`);if(!inp)return;
+  inp.focus();
+  if(inp.tagName==="INPUT")inp.select();
+  else inp.setSelectionRange(inp.value.length,inp.value.length);
+  if(c.type==="combo")comboFocus(inp);
+}
+function commitEdit(){
+  if(!selCell||!isEditing)return;
+  const{rowId,colKey}=selCell;
+  const inp=document.getElementById(`ei-${rowId}-${colKey}`);
+  if(inp)upd(activeTab,rowId,colKey,inp.value);
+  isEditing=false;
+  rerenderCellRO(rowId,colKey,true);
+  refreshStatusCell(rowId);
+  renderToolbar();
+  scheduleSave();
+}
+function rerenderCellRO(rowId,colKey,keepSel){
+  const td=document.getElementById(`td-${rowId}-${colKey}`);if(!td)return;
+  const r=DB[activeTab]?.find(r=>r.id===rowId);if(!r)return;
+  const c=COLS.find(c=>c.key===colKey);
+  const isLeft=colKey==="problemDetail";
+  td.className="xcell"+(keepSel?" xsel":"");
+  td.dataset.rid=rowId;td.dataset.col=colKey;
+  if(c.type==="date")td.style.cursor="pointer";
+  td.onclick=e=>xCellClick(e,td);
+  td.onmouseenter=function(){this.classList.add("xhover");};
+  td.onmouseleave=function(){this.classList.remove("xhover");};
+  const val=r[colKey]||"";
+  const display=colKey==="problemType"&&val?`<span style="font-weight:600;color:var(--accent)">${esc(val)}</span>`:(val?esc(val):"");
+  td.innerHTML=`<div class="xcontent${val?"":" empty"}${isLeft?" left":""}">${display||"—"}</div>`;
+}
+
+document.addEventListener("keydown",function(e){
+  if(activeTab==="นิยาม"||!selCell)return;
+  const{rowId,colKey}=selCell;
+  if(isEditing)return;
+  if(e.key==="Escape"){commitEdit();selCell=null;isEditing=false;document.querySelectorAll(".xcell").forEach(t=>t.classList.remove("xsel"));return;}
+  if(e.key==="Delete"||e.key==="Backspace"){e.preventDefault();upd(activeTab,rowId,colKey,"");rerenderCellRO(rowId,colKey,true);refreshStatusCell(rowId);scheduleSave();return;}
+  if(e.key==="F2"||e.key==="Enter"){e.preventDefault();enterEdit();return;}
+  if(e.key==="Tab"){e.preventDefault();moveHorizontal(e.shiftKey?-1:1);return;}
+  if(e.key==="ArrowRight"){e.preventDefault();moveHorizontal(1);return;}
+  if(e.key==="ArrowLeft"){e.preventDefault();moveHorizontal(-1);return;}
+  if(e.key==="ArrowDown"){e.preventDefault();moveVertical(1);return;}
+  if(e.key==="ArrowUp"){e.preventDefault();moveVertical(-1);return;}
+  if(e.key.length===1&&!e.ctrlKey&&!e.metaKey){
+    enterEdit();
+    setTimeout(()=>{
+      const inp=document.getElementById(`ei-${rowId}-${colKey}`);
+      if(inp&&inp.tagName!=="TEXTAREA"){inp.value=e.key;upd(activeTab,rowId,colKey,e.key);comboType(inp);}
+      else if(inp){inp.value=e.key;upd(activeTab,rowId,colKey,e.key);}
+    },0);
+  }
+});
+
+function xKey(e,inp){
+  upd(activeTab,inp.dataset.rid,inp.dataset.col,inp.value);
+  if(e.key==="Escape"){e.preventDefault();const r=DB[activeTab]?.find(r=>r.id===inp.dataset.rid);if(r)inp.value=r[inp.dataset.col]||"";isEditing=false;rerenderCellRO(inp.dataset.rid,inp.dataset.col,true);return;}
+  if(e.key==="Tab"){e.preventDefault();commitEdit();moveHorizontal(e.shiftKey?-1:1);return;}
+  if(e.key==="Enter"&&inp.tagName!=="TEXTAREA"){e.preventDefault();commitEdit();moveVertical(1);return;}
+  if(e.key==="ArrowDown"&&inp.tagName!=="TEXTAREA"){e.preventDefault();commitEdit();moveVertical(1);return;}
+  if(e.key==="ArrowUp"&&inp.tagName!=="TEXTAREA"){e.preventDefault();commitEdit();moveVertical(-1);return;}
+}
+function xKeyCombo(e,inp){
+  const dd=document.getElementById("g-combo");
+  const opts=[...dd.querySelectorAll(".combo-opt")];
+  const hi=dd.querySelector(".combo-highlighted");
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){
+    e.preventDefault();
+    if(!dd.classList.contains("open")){comboFocus(inp);return;}
+    const idx=opts.indexOf(hi);
+    const next=e.key==="ArrowDown"?opts[idx+1]||opts[0]:opts[idx-1]||opts[opts.length-1];
+    if(hi)hi.classList.remove("combo-highlighted");
+    if(next){next.classList.add("combo-highlighted");next.scrollIntoView({block:"nearest"});}
+    return;
+  }
+  if(e.key==="Enter"){e.preventDefault();if(hi&&dd.classList.contains("open"))comboSel(hi);else commitEdit();return;}
+  if(e.key==="Escape"){e.preventDefault();dd.classList.remove("open");const r=DB[activeTab]?.find(r=>r.id===inp.dataset.rid);if(r)inp.value=r[inp.dataset.col]||"";isEditing=false;rerenderCellRO(inp.dataset.rid,inp.dataset.col,true);return;}
+  if(e.key==="Tab"){e.preventDefault();if(hi&&dd.classList.contains("open"))comboSel(hi);else commitEdit();moveHorizontal(e.shiftKey?-1:1);return;}
+}
+function xBlur(inp){
+  setTimeout(()=>{
+    if(document.querySelector("#g-combo.open,#g-dp.open"))return;
+    if(selCell&&isEditing&&selCell.rowId===inp.dataset.rid&&selCell.colKey===inp.dataset.col)commitEdit();
+  },180);
+}
+function moveHorizontal(dir){
+  if(!selCell)return;
+  const idx=EDITABLE_COLS.findIndex(c=>c.key===selCell.colKey);
+  const next=EDITABLE_COLS[idx+dir];
+  if(next)selectCell(selCell.rowId,next.key);
+}
+function moveVertical(dir){
+  if(!selCell)return;
+  const rows=getRows(activeTab);
+  const idx=rows.findIndex(r=>r.id===selCell.rowId);
+  const next=rows[idx+dir];
+  if(next)selectCell(next.id,selCell.colKey);
+  else if(dir===1){addRow();setTimeout(()=>{const nr=getRows(activeTab);const last=nr[nr.length-1];if(last)selectCell(last.id,selCell.colKey);},60);}
+}
+
+document.addEventListener("mousedown",function(e){
+  if(!e.target.closest(".combo-wrap,.xinput-wrap")&&!e.target.closest("#g-combo"))
+    document.getElementById("g-combo").classList.remove("open");
+  if(!e.target.closest(".xinput-wrap")&&!e.target.closest("#g-dp")&&!e.target.closest(".dp-arr"))
+    {document.getElementById("g-dp").classList.remove("open");activeDpId=null;}
+  if(!e.target.closest(".flt-btn")&&!e.target.closest("#g-flt"))
+    {document.getElementById("g-flt").classList.remove("open");activeFltCol=null;}
+  if(selCell&&!e.target.closest("tbody,#g-combo,#g-dp")){
+    if(isEditing)commitEdit();
+    selCell=null;isEditing=false;
+    document.querySelectorAll(".xcell.xsel").forEach(t=>t.classList.remove("xsel"));
+  }
+});
+
+// ═══════════════════════════════════════════════════════
+// COMBO
+// ═══════════════════════════════════════════════════════
+function comboFocus(inp){
+  let opts=[];try{opts=JSON.parse(inp.dataset.opts||"[]");}catch(e){}
+  _comboMeta={rowId:inp.dataset.rid,colKey:inp.dataset.col,opts,inp};
+  buildCombo("",opts,inp);
+}
+function buildCombo(q,opts,inp){
+  const dd=document.getElementById("g-combo");
+  const flt=opts.filter(o=>o&&o.toLowerCase().includes((q||"").toLowerCase()));
+  if(!flt.length&&q){dd.classList.remove("open");return;}
+  dd.innerHTML=flt.map(o=>`<div class="combo-opt" data-val="${esc(o)}" onmousedown="window._cs2(this)">${esc(o)}</div>`).join("");
+  posPopup(dd,inp);dd.classList.add("open");
+}
+function comboType(inp){
+  upd(activeTab,inp.dataset.rid,inp.dataset.col,inp.value);
+  if(_comboMeta)buildCombo(inp.value,_comboMeta.opts,inp);
+}
+function comboSel(el){
+  if(!_comboMeta)return;
+  const val=el.dataset.val;
+  upd(activeTab,_comboMeta.rowId,_comboMeta.colKey,val);
+  const inp=document.getElementById(`ei-${_comboMeta.rowId}-${_comboMeta.colKey}`);
+  if(inp)inp.value=val;
+  document.getElementById("g-combo").classList.remove("open");
+  refreshStatusCell(_comboMeta.rowId);
+  scheduleSave();
+}
+
+// ═══════════════════════════════════════════════════════
+// DATE PICKER
+// ═══════════════════════════════════════════════════════
+const MO=["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+function dpToggle(e,btn){
+  e.preventDefault();e.stopPropagation();
+  const rowId=btn.dataset.rid,colKey=btn.dataset.col;
+  const inp=document.getElementById(`ei-${rowId}-${colKey}`);
+  const popup=document.getElementById("g-dp");
+  if(activeDpId===`${rowId}-${colKey}`&&popup.classList.contains("open")){popup.classList.remove("open");activeDpId=null;return;}
+  activeDpId=`${rowId}-${colKey}`;_dpMeta={rowId,colKey};
+  const r=DB[activeTab]?.find(r=>r.id===rowId);
+  const d=parseDMY(r?.[colKey]||"")||new Date();
+  dpBuild(d.getFullYear(),d.getMonth());
+  posPopup(popup,inp||btn);popup.classList.add("open");
+}
+function dpBuild(vy,vm){
+  if(!_dpMeta)return;
+  const{rowId,colKey}=_dpMeta;
+  const today=new Date();
+  const r=DB[activeTab]?.find(r=>r.id===rowId);
+  const sel=parseDMY(r?.[colKey]||"");
+  const first=new Date(vy,vm,1).getDay(),days=new Date(vy,vm+1,0).getDate();
+  const yrs=Array.from({length:14},(_,i)=>today.getFullYear()-4+i);
+  let h=`<div class="dp-nav">
+    <button class="dp-nav-btn" onclick="window._dpn(event,${vy},${vm},-1)">‹</button>
+    <select class="dp-sel" onchange="window._dpnm(this.value,${vy})">${MO.map((m,i)=>`<option value="${i}"${i===vm?" selected":""}>${m}</option>`).join("")}</select>
+    <select class="dp-sel" onchange="window._dpny(this.value,${vm})">${yrs.map(y=>`<option value="${y}"${y===vy?" selected":""}>${y+543}</option>`).join("")}</select>
+    <button class="dp-nav-btn" onclick="window._dpn(event,${vy},${vm},1)">›</button>
+  </div><div class="dp-grid">
+    <div class="dp-hdr">อา</div><div class="dp-hdr">จ</div><div class="dp-hdr">อ</div>
+    <div class="dp-hdr">พ</div><div class="dp-hdr">พฤ</div><div class="dp-hdr">ศ</div><div class="dp-hdr">ส</div>
+    ${"<div></div>".repeat(first)}`;
+  for(let d=1;d<=days;d++){
+    const isSel=sel&&sel.getFullYear()===vy&&sel.getMonth()===vm&&sel.getDate()===d;
+    const isTod=today.getFullYear()===vy&&today.getMonth()===vm&&today.getDate()===d;
+    const v=`${pad(d)}/${pad(vm+1)}/${vy}`;
+    h+=`<div class="dp-day${isSel?" sel":isTod?" today":""}" data-v="${v}" onclick="window._dpp(event,this)">${d}</div>`;
+  }
+  h+=`</div><button class="dp-today" data-v="${todayDMY()}" onclick="window._dpp(event,this)">วันนี้</button>`;
+  document.getElementById("g-dp").innerHTML=h;
+}
+function dpNav(e,vy,vm,dir){e.preventDefault();e.stopPropagation();let ny=vy,nm=vm+dir;if(nm<0){nm=11;ny--;}else if(nm>11){nm=0;ny++;}dpBuild(ny,nm);}
+function dpPick(e,el){
+  e.preventDefault();e.stopPropagation();if(!_dpMeta)return;
+  const val=el.dataset.v;
+  upd(activeTab,_dpMeta.rowId,_dpMeta.colKey,val);
+  const inp=document.getElementById(`ei-${_dpMeta.rowId}-${_dpMeta.colKey}`);if(inp)inp.value=val;
+  document.getElementById("g-dp").classList.remove("open");activeDpId=null;
+  refreshStatusCell(_dpMeta.rowId);scheduleSave();
+}
+
+// ═══════════════════════════════════════════════════════
+// FILTER
+// ═══════════════════════════════════════════════════════
+function openFlt(e,col){
+  e.stopPropagation();
+  const popup=document.getElementById("g-flt");
+  if(activeFltCol===col&&popup.classList.contains("open")){popup.classList.remove("open");activeFltCol=null;return;}
+  activeFltCol=col;_fltMeta={col};
+  buildFlt(col,"");posPopup(popup,e.currentTarget);popup.classList.add("open");
+}
+function buildFlt(col,q){
+  const vals=uniqueVals(activeTab,col);
+  const cur=filters[col]||new Set();
+  const flt=vals.filter(v=>v.toLowerCase().includes(q.toLowerCase()));
+  let h=`<input class="flt-search" placeholder="ค้นหา..." value="${esc(q)}" oninput="window._fs(this.value)" onmousedown="event.stopPropagation()"/>
+  <div class="flt-list">`;
+  h+=flt.length===0?`<div style="padding:8px 12px;font-size:11px;color:var(--text3)">ไม่มีข้อมูล</div>`:
+    flt.map(v=>`<label class="flt-row"><input type="checkbox" data-val="${esc(v)}" ${cur.has(v)?"checked":""} onchange="window._ft(this)" onmousedown="event.stopPropagation()"/>${esc(v)}</label>`).join("");
+  h+=`</div><div class="flt-foot"><button class="flt-act" onmousedown="window._fa(true)">ทั้งหมด</button><button class="flt-act" onmousedown="window._fa(false)">ล้าง</button></div>`;
+  document.getElementById("g-flt").innerHTML=h;
+}
+function fltToggle(cb){
+  if(!_fltMeta)return;
+  const col=_fltMeta.col,val=cb.dataset.val;
+  if(!filters[col])filters[col]=new Set();
+  if(cb.checked)filters[col].add(val);else filters[col].delete(val);
+  if(!filters[col].size)delete filters[col];
+  reRenderTbody();renderToolbar();
+}
+function fltAll(sel){
+  if(!_fltMeta)return;
+  const col=_fltMeta.col;
+  if(sel)filters[col]=new Set(uniqueVals(activeTab,col));else delete filters[col];
+  buildFlt(col,"");reRenderTbody();renderToolbar();
+}
+function removeFilter(col,val){
+  if(filters[col]){filters[col].delete(val);if(!filters[col].size)delete filters[col];}render();
+}
+function clearAllFilters(){filters={};render();}
+
+// ═══════════════════════════════════════════════════════
+// POPUP UTILS
+// ═══════════════════════════════════════════════════════
+function posPopup(popup,anchor){
+  popup.style.visibility="hidden";popup.style.display="block";
+  const r=anchor.getBoundingClientRect();
+  const pw=popup.offsetWidth||220,ph=popup.offsetHeight||260;
+  let top=r.bottom+5,left=r.left;
+  if(top+ph>window.innerHeight-8)top=r.top-ph-5;
+  if(left+pw>window.innerWidth-8)left=window.innerWidth-pw-8;
+  if(left<8)left=8;if(top<8)top=8;
+  popup.style.top=top+"px";popup.style.left=left+"px";
+  popup.style.visibility="";popup.style.display="";
+}
+function closeAllPopups(){
+  ["g-combo","g-dp","g-flt"].forEach(id=>document.getElementById(id).classList.remove("open"));
+  activeDpId=null;activeFltCol=null;
+}
+
+// ═══════════════════════════════════════════════════════
+// SORT / DATA OPS
+// ═══════════════════════════════════════════════════════
+function togglePending(){pendingFirst=!pendingFirst;if(pendingFirst){sortColKey=null;sortDateDir=0;}render();}
+function cycleSortDate(){pendingFirst=false;sortColKey=null;sortDateDir=sortDateDir===0?1:sortDateDir===1?-1:0;render();}
+function colSort(key){pendingFirst=false;sortDateDir=0;if(sortColKey===key)sortColDir=-sortColDir;else{sortColKey=key;sortColDir=1;}render();}
+
+function upd(tab,id,field,val){const r=DB[tab]?.find(r=>r.id===id);if(r)r[field]=val;}
+
+function refreshStatusCell(rowId){
+  const r=DB[activeTab]?.find(r=>r.id===rowId);if(!r)return;
+  const st=rowStatus(r);
+  const td=document.getElementById(`td-${rowId}-status`);
+  if(td)td.innerHTML=`<span class="${statusCls(st)}">${statusLabel(st)}</span>`;
+  const tr=document.getElementById(`row-${rowId}`);
+  if(tr)tr.className=st==="open"?"pending":"";
+}
+
+function addRow(){
+  const row=newRow(DB[activeTab].length+1);
+  DB[activeTab].push(row);
+  reRenderTbody();renderToolbar();scheduleSave();
+  setTimeout(()=>{const f=EDITABLE_COLS[0];if(f)selectCell(row.id,f.key);},40);
+}
+function delRow(e,rowId){
+  e.stopPropagation();
+  if(!confirm("ลบแถวนี้?"))return;
+  if(selCell?.rowId===rowId){selCell=null;isEditing=false;}
+  DB[activeTab]=DB[activeTab].filter(r=>r.id!==rowId).map((r,i)=>({...r,no:i+1}));
+  reRenderTbody();renderToolbar();scheduleSave();
+}
+function reRenderTbody(){
+  const el=document.getElementById("main-tbody");if(!el)return;
+  const rows=getRows(activeTab);
+  el.innerHTML=rows.length===0
+    ?`<tr><td colspan="${COLS.length+1}" class="slim"><div style="text-align:center;padding:32px;color:var(--text3);font-size:12px">— ไม่มีข้อมูล —</div></td></tr>`
+    :rows.map(r=>renderRow(r,activeTab)).join("");
+  attachPhotoHandlers();
+  if(selCell&&!isEditing){const td=document.getElementById(`td-${selCell.rowId}-${selCell.colKey}`);if(td)td.classList.add("xsel");}
+}
+
+// ═══════════════════════════════════════════════════════
+// PHOTO
+// ═══════════════════════════════════════════════════════
+function attachPhotoHandlers(){
+  const tab=activeTab;
+  DB[tab].forEach(r=>{
+    ["beforePhoto","afterPhoto"].forEach(side=>{
+      const old=document.getElementById(`ph-${r.id}-${side}`);if(!old)return;
+      const inp=old.cloneNode(true);old.replaceWith(inp);
+      inp.addEventListener("change",async function(){
+        const f=this.files[0];if(!f)return;
+        const url=await uploadPhoto(r.id,side,f);
+        if(!url)return;
+        upd(tab,r.id,side,url);
+        refreshStatusCell(r.id);
+        const td=document.getElementById(`td-${r.id}-${side}`);
+        if(td)td.innerHTML=renderPhotoCell(r,side);
+        attachPhotoHandlers();scheduleSave();this.value="";
+      });
+    });
+  });
+}
+function triggerPhoto(rowId,side){document.getElementById(`ph-${rowId}-${side}`)?.click();}
+async function clearPhoto(rowId,side){
+  await deletePhotoStorage(rowId,side);
+  upd(activeTab,rowId,side,"");
+  refreshStatusCell(rowId);
+  const r=DB[activeTab]?.find(r=>r.id===rowId);
+  const td=document.getElementById(`td-${rowId}-${side}`);
+  if(td&&r)td.innerHTML=renderPhotoCell(r,side);
+  attachPhotoHandlers();scheduleSave();
+}
+function openLb(rowId,side){
+  const r=DB[activeTab]?.find(r=>r.id===rowId);if(!r)return;
+  document.getElementById("lb-img").src=r[side];
+  document.getElementById("lb").classList.add("open");
+}
+function closeLb(){document.getElementById("lb").classList.remove("open");}
+document.getElementById("lb").addEventListener("click",function(e){if(e.target===this)closeLb();});
+
+// ═══════════════════════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════════════════════
+function exportCSV(){
+  commitEdit();
+  const lines=[];
+  AREA_TABS.forEach(tab=>{
+    lines.push([`=== ${tab} ===`]);
+    lines.push(["No","พื้นที่","ประเภทปัญหา","รายละเอียดปัญหา","สถานะ","ผู้แจ้ง","วันที่แจ้ง","วันกำหนดเสร็จ","ผู้แก้ไข","ผู้ปิดประเด็น","URL ภาพก่อน","URL ภาพหลัง"]);
+    DB[tab].forEach(r=>lines.push([r.no,r.area,r.problemType,r.problemDetail,statusLabel(rowStatus(r)),r.reporter,r.reportDate,r.dueDate,r.fixer,r.closer,r.beforePhoto||"",r.afterPhoto||""]));
+    lines.push([]);
+  });
+  const csv=lines.map(l=>l.map(c=>`"${String(c||"").replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a=Object.assign(document.createElement("a"),{href:URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"})),download:`inspection_${todayDMY().replace(/\//g,"-")}.csv`});
+  a.click();URL.revokeObjectURL(a.href);
+}
+
+function showToast(msg,ms=3200){
+  const t=document.getElementById("toast");t.textContent=msg;t.style.display="block";
+  clearTimeout(t._t);t._t=setTimeout(()=>t.style.display="none",ms);
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPOSE to window (onclick= handlers need global scope)
+// ═══════════════════════════════════════════════════════
+Object.assign(window,{
+  _st:switchTab, _ar:addRow, _dr:delRow,
+  _cc:xCellClick, _xk:xKey, _kc:xKeyCombo, _xb:xBlur,
+  _ct:comboType, _cf:comboFocus, _cs2:comboSel,
+  _dpt:dpToggle, _dpn:dpNav, _dpnm:(nm,vy)=>dpBuild(+vy,+nm),
+  _dpny:(ny,vm)=>dpBuild(+ny,+vm), _dpp:dpPick,
+  _of:openFlt, _fs:(q)=>{if(_fltMeta)buildFlt(_fltMeta.col,q);},
+  _ft:fltToggle, _fa:fltAll, _rf:removeFilter,
+  _tp:triggerPhoto, _cp:clearPhoto, _ol:openLb,
+  _upd:upd, _cs:colSort,
+  togglePending, cycleSortDate, clearAllFilters, exportCSV, closeLb,
+});
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+fbLoad();
+</script>
+</body>
+</html>
